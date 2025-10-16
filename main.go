@@ -15,6 +15,7 @@ func main() {
 	reader := bufio.NewReader(os.Stdin)
 	compra := model.Compra{}
 	items := []model.Item{}
+	compra.Itens = items
 
 	fmt.Println("Qual será a data da compra? (dd/mm/yyyy): ")
 	data, _ := reader.ReadString('\n')
@@ -71,7 +72,7 @@ func main() {
 	fmt.Println("Local: ", compra.Mercado)
 	fmt.Println("Items: ")
 
-	for _, item := range items {
+	for _, item := range compra.Itens {
 		fmt.Println("Nome: ", item.Nome, "Preço: ", item.Preco, "Quantidade: ", item.Quantidade)
 		fmt.Println("--------------------------------------------------------------------------")
 	}
