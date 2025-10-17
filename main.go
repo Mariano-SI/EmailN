@@ -2,29 +2,22 @@ package main
 
 import (
 	"fmt"
-	"sync"
 )
 
 func main() {
-	var (
-		m  sync.Mutex
-		wg sync.WaitGroup
-		i  int
-	)
 
-	const total = 10000
+	channel := make(chan int)
 
-	wg.Add(total)
+	go setList(channel)
 
-	for x := 0; x < total; x++ {
-		go func() {
-			defer wg.Done()
-			m.Lock()
-			i++
-			m.Unlock()
-		}()
+	for v := range channel {
+		fmt.Println(v)
 	}
+}
 
-	wg.Wait()
-	fmt.Println("Valor final de i:", i)
+func setList(channel chan int) {
+	for i := 0; i < 100; i++ {
+		channel <- i
+	}
+	close(channel)
 }
