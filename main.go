@@ -3,38 +3,28 @@ package main
 import (
 	"fmt"
 	"sync"
-	"time"
 )
 
 func main() {
-	start := time.Now()
+	var (
+		m  sync.Mutex
+		wg sync.WaitGroup
+		i  int
+	)
 
-	wg := sync.WaitGroup{}
-	wg.Add(3)
+	const total = 10000
 
-	go callDatabase(&wg)
-	go callApi(&wg)
-	go processInternal(&wg)
+	wg.Add(total)
+
+	for x := 0; x < total; x++ {
+		go func() {
+			defer wg.Done()
+			m.Lock()
+			i++
+			m.Unlock()
+		}()
+	}
 
 	wg.Wait()
-	elapsed := time.Since(start)
-	fmt.Printf("Tempo total de execução: %v\n", elapsed)
-}
-
-func callDatabase(wg *sync.WaitGroup) {
-	time.Sleep(time.Second)
-	fmt.Println("Finalizado callDatabase")
-	wg.Done()
-}
-
-func callApi(wg *sync.WaitGroup) {
-	time.Sleep(time.Second * 2)
-	fmt.Println("Finalizado callApi")
-	wg.Done()
-}
-
-func processInternal(wg *sync.WaitGroup) {
-	time.Sleep(time.Second)
-	fmt.Println("Finalizado processInternal")
-	wg.Done()
+	fmt.Println("Valor final de i:", i)
 }
