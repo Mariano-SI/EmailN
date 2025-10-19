@@ -2,6 +2,7 @@ package campaing
 
 import (
 	"emailn/internal/contract"
+	"emailn/internal/internal-errors"
 	"errors"
 	"testing"
 
@@ -33,7 +34,6 @@ func Test_Create_Campaing(t *testing.T) {
 	repo.On("Save", mock.Anything).Return(nil)
 
 	service.Repository = repo
-	
 
 	id, error := service.Create(newCampaing)
 
@@ -81,7 +81,6 @@ func Test_Create_ValidateRepositorySave(t *testing.T) {
 
 	_, err := service.Create(newCampaing)
 
-	assert.Equal("error to save on database", err.Error())
+	assert.True(errors.Is(err, internalerrors.ErrInternal))
 
-	
 }
