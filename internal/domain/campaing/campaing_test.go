@@ -4,13 +4,15 @@ import (
 	"testing"
 	"time"
 
+	"github.com/jaswdr/faker"
 	"github.com/stretchr/testify/assert"
 )
 
 var (
 	name     = "Campain X"
-	content  = "Body"
+	content  = "Test Body"
 	contacts = []string{"email1@email.com", "email1@email.com"}
+	fake     = faker.New()
 )
 
 func Test_NewCampaing_CreateCampaing(t *testing.T) {
@@ -38,24 +40,45 @@ func Test_NewCampaing_CreatedOnMustBeNow(t *testing.T) {
 
 	assert.Greater(campaing.CreatedOn, now)
 }
-func Test_NewCampaing_MustValidateName(t *testing.T) {
+func Test_NewCampaing_MustValidateNameMin(t *testing.T) {
 	assert := assert.New(t)
 
 	_, error := NewCampaing("", content, contacts)
 
-	assert.Equal("name is required", error.Error())
+	assert.Equal("name is required with min 5", error.Error())
 }
-func Test_NewCampaing_MustValidateContent(t *testing.T) {
+func Test_NewCampaing_MustValidateNameMax(t *testing.T) {
+	assert := assert.New(t)
+
+	_, error := NewCampaing(fake.Lorem().Text(30), content, contacts)
+
+	assert.Equal("name is required with max 24", error.Error())
+}
+func Test_NewCampaing_MustValidateContentMin(t *testing.T) {
 	assert := assert.New(t)
 
 	_, error := NewCampaing(name, "", contacts)
 
-	assert.Equal("content is required", error.Error())
+	assert.Equal("content is required with min 5", error.Error())
 }
-func Test_NewCampaing_MustValidateContacts(t *testing.T) {
+func Test_NewCampaing_MustValidateContentMax(t *testing.T) {
+	assert := assert.New(t)
+
+	_, error := NewCampaing(name, fake.Lorem().Text(1200), contacts)
+
+	assert.Equal("content is required with max 1024", error.Error())
+}
+func Test_NewCampaing_MustValidateContactsMin(t *testing.T) {
 	assert := assert.New(t)
 
 	_, error := NewCampaing(name, content, []string{})
 
-	assert.Equal("contacts is required", error.Error())
+	assert.Equal("contacts is required with min 1", error.Error())
+}
+func Test_NewCampaing_MustValidateContacts(t *testing.T) {
+	assert := assert.New(t)
+
+	_, error := NewCampaing(name, content, []string{"email invalid"})
+
+	assert.Equal("email is invalid", error.Error())
 }

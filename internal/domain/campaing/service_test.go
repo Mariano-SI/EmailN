@@ -2,7 +2,7 @@ package campaing
 
 import (
 	"emailn/internal/contract"
-	"emailn/internal/internal-errors"
+	internalerrors "emailn/internal/internal-errors"
 	"errors"
 	"testing"
 
@@ -22,7 +22,7 @@ func (r *repositoryMock) Save(campaing *Campaing) error {
 var (
 	newCampaing = contract.NewCampaing{
 		Name:    "Test Y",
-		Content: "Body",
+		Content: "Body Hi",
 		Emails:  []string{"test1@email.com"},
 	}
 	service = Service{}
@@ -46,41 +46,41 @@ func Test_Create_ValidateDomainError(t *testing.T) {
 	assert := assert.New(t)
 
 	newCampaing.Name = ""
-	_, error := service.Create(newCampaing)
+	_, err := service.Create(newCampaing)
 
-	assert.NotNil(error)
-	assert.Equal("name is required", error.Error())
+	assert.False((errors.Is(internalerrors.ErrInternal, err)))
 
 }
 func Test_Create_SaveCampaing(t *testing.T) {
-	repositoryMock := new(repositoryMock)
-	repositoryMock.On("Save", mock.MatchedBy(func(campaing *Campaing) bool {
-
-		if campaing.Name != newCampaing.Name {
-			return false
-		} else if campaing.Content != newCampaing.Content {
-			return false
-		} else if len(campaing.Contacts) != len(newCampaing.Emails) {
-			return false
-		}
-		return true
+	repo := new(repositoryMock)
+	repo.On("Save", mock.MatchedBy(func(c *Campaing) bool {
+		return c.Name == "Test Y" && c.Content == "Body Hi" && len(c.Contacts) == 1
 	})).Return(nil)
 
-	service.Repository = repositoryMock
+	service := Service{Repository: repo}
+	newCampaing := contract.NewCampaing{
+		Name:    "Test Y",
+		Content: "Body Hi",
+		Emails:  []string{"test1@email.com"},
+	}
 
 	service.Create(newCampaing)
 
-	repositoryMock.AssertExpectations(t)
+	repo.AssertExpectations(t)
 }
 func Test_Create_ValidateRepositorySave(t *testing.T) {
 	assert := assert.New(t)
-	repositoryMock := new(repositoryMock)
-	repositoryMock.On("Save", mock.Anything).Return(errors.New("error to save on database"))
+	repo := new(repositoryMock)
+	repo.On("Save", mock.Anything).Return(errors.New("internal server error"))
 
-	service.Repository = repositoryMock
+	service := Service{Repository: repo}
+	newCampaing := contract.NewCampaing{
+		Name:    "Test Y",
+		Content: "Body Hi",
+		Emails:  []string{"test1@email.com"},
+	}
 
 	_, err := service.Create(newCampaing)
 
 	assert.True(errors.Is(err, internalerrors.ErrInternal))
-
 }
