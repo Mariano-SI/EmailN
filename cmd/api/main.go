@@ -23,8 +23,8 @@ func main() {
 	campaignService := campaign.Service{Repository: &database.CampaignRepository{}}
 	handler := endpoints.Handler{CampaignService: campaignService}
 
-	r.Get("/campaigns", handler.CampaignGet)
-	r.Post("/campaigns", handler.CampaignPost)
+	r.Get("/campaigns", endpoints.HandlerError(handler.CampaignGet))
+	r.Post("/campaigns", endpoints.HandlerError(handler.CampaignPost))
 
 	fmt.Println("🚀 Servidor rodando na porta 3000...")
 	log.Fatal(http.ListenAndServe(":3000", r))

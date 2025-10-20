@@ -22,12 +22,16 @@ func (s *Service) Create(newCampaign contract.NewCampaign) (string, error) {
 	return campaign.ID, nil
 }
 
-func (s *Service) Get() []Campaign {
-	campaigns := s.Repository.Get()
+func (s *Service) Get() ([]Campaign, error) {
+	campaigns, err := s.Repository.Get()
 
-	if len(campaigns) == 0 {
-		return []Campaign{}
+	if err != nil {
+		return nil, internalerrors.ErrInternal
 	}
 
-	return campaigns
+	if len(campaigns) == 0 {
+		return []Campaign{}, nil
+	}
+
+	return campaigns, nil
 }
