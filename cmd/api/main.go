@@ -3,6 +3,9 @@ package main
 import (
 	"emailn/internal/contract"
 	"emailn/internal/domain/campaign"
+	"emailn/internal/infrastructure/database"
+	internalerrors "emailn/internal/internal-errors"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -20,9 +23,8 @@ func main() {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
-	service := campaign.Service{}
+	service := campaign.Service{Repository: &database.CampaignRepository{}}
 	r.Post("/campaigns", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("entrou aqui")
 		var request contract.NewCampaign
 		err := render.DecodeJSON(r.Body, &request)
 		if err != nil {
@@ -31,7 +33,11 @@ func main() {
 		id, err := service.Create(request)
 
 		if err != nil {
-			render.Status(r, http.StatusBadRequest)
+			if errors.Is(err, internalerrors.ErrInternal) {
+				render.Status(r, http.StatusInternalServerError)
+			} else {
+				render.Status(r, http.StatusBadRequest)
+			}
 			render.JSON(w, r, map[string]string{"error": err.Error()})
 			return
 		}

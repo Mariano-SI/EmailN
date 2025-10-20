@@ -2,7 +2,7 @@ package campaign
 
 import (
 	"emailn/internal/contract"
-	internalerrors "emailn/internal/internal-errors"
+	"emailn/internal/internal-errors"
 )
 
 type Service struct {
