@@ -2,7 +2,9 @@ package main
 
 import (
 	"emailn/internal/contract"
-	"emailn/internal/domain/campaing"
+	"emailn/internal/domain/campaign"
+	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/go-chi/chi"
@@ -18,9 +20,10 @@ func main() {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
-	service := campaing.Service{}
+	service := campaign.Service{}
 	r.Post("/campaigns", func(w http.ResponseWriter, r *http.Request) {
-		var request contract.NewCampaing
+		fmt.Println("entrou aqui")
+		var request contract.NewCampaign
 		err := render.DecodeJSON(r.Body, &request)
 		if err != nil {
 			println(err)
@@ -38,5 +41,6 @@ func main() {
 
 	})
 
-	http.ListenAndServe(":3000", r)
+	fmt.Println("🚀 Servidor rodando na porta 3000...")
+	log.Fatal(http.ListenAndServe(":3000", r))
 }
