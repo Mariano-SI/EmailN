@@ -12,3 +12,7 @@ func (cr *CampaignRepository) Save(campaign *campaign.Campaign) error {
 	cr.campaigns = append(cr.campaigns, *campaign)
 	return nil
 }
+func (cr *CampaignRepository) Get() []campaign.Campaign {
+
+	return cr.campaigns
+}
