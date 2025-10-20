@@ -1,4 +1,4 @@
-package campaing
+package campaign
 
 import (
 	internalerrors "emailn/internal/internal-errors"
@@ -11,7 +11,7 @@ type Contact struct {
 	Email string `validate:"email"`
 }
 
-type Campaing struct {
+type Campaign struct {
 	ID        string    `validate:"required"`
 	Name      string    `validate:"min=5,max=24"`
 	CreatedOn time.Time `validate:"required"`
@@ -19,7 +19,7 @@ type Campaing struct {
 	Contacts  []Contact `validate:"min=1,dive"`
 }
 
-func NewCampaing(name string, content string, emails []string) (*Campaing, error) {
+func NewCampaign(name string, content string, emails []string) (*Campaign, error) {
 
 	contacts := make([]Contact, len(emails))
 
@@ -27,7 +27,7 @@ func NewCampaing(name string, content string, emails []string) (*Campaing, error
 		contacts[index] = Contact{email}
 	}
 
-	campaing := &Campaing{
+	campaign := &Campaign{
 		ID:        xid.New().String(),
 		Name:      name,
 		Content:   content,
@@ -35,10 +35,10 @@ func NewCampaing(name string, content string, emails []string) (*Campaing, error
 		Contacts:  contacts,
 	}
 
-	err := internalerrors.ValidateStruct(campaing)
+	err := internalerrors.ValidateStruct(campaign)
 	if err != nil {
 		return nil, err
 	}
 
-	return campaing, nil
+	return campaign, nil
 }
