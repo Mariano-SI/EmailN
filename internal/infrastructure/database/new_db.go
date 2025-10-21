@@ -1,6 +1,7 @@
 package database
 
 import (
+	"emailn/internal/domain/campaign"
 	"log"
 
 	"gorm.io/driver/postgres"
@@ -15,5 +16,6 @@ func NewDb() *gorm.DB {
 	}
 
 	log.Println("✅ Successfully connected to the database.")
+	db.AutoMigrate(&campaign.Campaign{}, &campaign.Contact{})
 	return db
 }
