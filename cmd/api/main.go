@@ -24,6 +24,7 @@ func main() {
 	handler := endpoints.Handler{CampaignService: &campaignService}
 
 	r.Get("/campaigns", endpoints.HandlerError(handler.CampaignGet))
+	r.Get("/campaigns/{id}", endpoints.HandlerError(handler.CampaignGetById))
 	r.Post("/campaigns", endpoints.HandlerError(handler.CampaignPost))
 
 	fmt.Println("🚀 Servidor rodando na porta 3000...")
