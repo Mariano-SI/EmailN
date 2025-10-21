@@ -29,7 +29,7 @@ var (
 		Content: "Body Hi",
 		Emails:  []string{"test1@email.com"},
 	}
-	service = Service{}
+	service = ServiceImp{}
 )
 
 func Test_Create_Campaign(t *testing.T) {
@@ -61,7 +61,7 @@ func Test_Create_SaveCampaign(t *testing.T) {
 		return c.Name == "Test Y" && c.Content == "Body Hi" && len(c.Contacts) == 1
 	})).Return(nil)
 
-	service := Service{Repository: repo}
+	service := ServiceImp{Repository: repo}
 	newCampaign := contract.NewCampaign{
 		Name:    "Test Y",
 		Content: "Body Hi",
@@ -77,7 +77,7 @@ func Test_Create_ValidateRepositorySave(t *testing.T) {
 	repo := new(repositoryMock)
 	repo.On("Save", mock.Anything).Return(errors.New("internal server error"))
 
-	service := Service{Repository: repo}
+	service := ServiceImp{Repository: repo}
 	newCampaign := contract.NewCampaign{
 		Name:    "Test Y",
 		Content: "Body Hi",
