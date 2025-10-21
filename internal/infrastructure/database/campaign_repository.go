@@ -24,7 +24,7 @@ func (cr *CampaignRepository) Get() ([]campaign.Campaign, error) {
 func (cr *CampaignRepository) GetBy(id string) (*campaign.Campaign, error) {
 	var campaign campaign.Campaign
 
-	tx := cr.Db.First(&campaign, id)
+	tx := cr.Db.First(&campaign, "id = ?", id)
 
 	return &campaign, tx.Error
 }
