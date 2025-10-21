@@ -25,6 +25,9 @@ func (r *serviceMock) Create(newCampaign contract.NewCampaign) (string, error) {
 func (r *serviceMock) Get() ([]campaign.Campaign, error) {
 	return nil, nil
 }
+func (r *serviceMock) GetBy(id string) (*contract.CampaignResponse, error) {
+	return nil, nil
+}
 
 var (
 	body = contract.NewCampaign{

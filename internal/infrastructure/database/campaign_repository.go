@@ -16,3 +16,15 @@ func (cr *CampaignRepository) Get() ([]campaign.Campaign, error) {
 
 	return cr.campaigns, nil
 }
+
+func (cr *CampaignRepository) GetBy(id string) (*campaign.Campaign, error) {
+	var campaign campaign.Campaign
+
+	for _, v := range cr.campaigns {
+		if v.ID == id {
+			campaign = v
+		}
+	}
+
+	return &campaign, nil
+}
