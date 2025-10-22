@@ -53,10 +53,11 @@ func (s *ServiceImp) GetBy(id string) (*contract.CampaignResponse, error) {
 	}
 
 	return &contract.CampaignResponse{
-		ID:      campaign.ID,
-		Name:    campaign.Name,
-		Content: campaign.Content,
-		Status:  campaign.Status,
+		ID:                   campaign.ID,
+		Name:                 campaign.Name,
+		Content:              campaign.Content,
+		Status:               campaign.Status,
+		AmountOfEmailsToSend: len(campaign.Contacts),
 	}, nil
 }
 
@@ -74,7 +75,7 @@ func (s *ServiceImp) Cancel(id string) error {
 	campaign.Cancel()
 
 	err = s.Repository.Update(campaign)
-	
+
 	if err != nil {
 		return internalerrors.ErrInternal
 	}
@@ -96,7 +97,7 @@ func (s *ServiceImp) Delete(id string) error {
 	campaign.Delete()
 
 	err = s.Repository.Delete(campaign)
-	
+
 	if err != nil {
 		return internalerrors.ErrInternal
 	}
