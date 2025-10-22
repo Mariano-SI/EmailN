@@ -1,135 +1,111 @@
-package campaign
+package campaign_test
 
 import (
 	"emailn/internal/contract"
+	"emailn/internal/domain/campaign"
 	internalerrors "emailn/internal/internal-errors"
 	"errors"
 	"testing"
+
+	internalmock "emailn/internal/test/internal-mock"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
 
-type repositoryMock struct {
-	mock.Mock
-}
-
-func (r *repositoryMock) Save(campaign *Campaign) error {
-	args := r.Called(campaign)
-	return args.Error(0)
-}
-func (r *repositoryMock) Get() ([]Campaign, error) {
-
-	return []Campaign{}, nil
-}
-func (r *repositoryMock) GetBy(id string) (*Campaign, error) {
-	args := r.Called(id)
-	if args.Error(1) != nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*Campaign), nil
-}
-
-func (r *repositoryMock) Delete(campaign *Campaign) error {
-	args := r.Called(campaign)
-	return args.Error(0)
-}
-
-func (r *repositoryMock) Update(campaign *Campaign) error {
-	args := r.Called(campaign)
-	return args.Error(0)
-}
-
-var (
-	newCampaign = contract.NewCampaign{
+func newTestCampaign() contract.NewCampaign {
+	return contract.NewCampaign{
 		Name:    "Test Y",
 		Content: "Body Hi",
 		Emails:  []string{"test1@email.com"},
 	}
-	service = ServiceImp{}
-)
+}
 
 func Test_Create_Campaign(t *testing.T) {
 	assert := assert.New(t)
-	repo := new(repositoryMock)
+	repo := new(internalmock.RepositoryMock)
 	repo.On("Save", mock.Anything).Return(nil)
 
-	service.Repository = repo
+	service := campaign.ServiceImp{Repository: repo}
+	campaign := newTestCampaign()
 
-	id, error := service.Create(newCampaign)
+	id, err := service.Create(campaign)
 
-	assert.Nil(error)
+	assert.Nil(err)
 	assert.NotNil(id)
-
 }
 
 func Test_Create_ValidateDomainError(t *testing.T) {
 	assert := assert.New(t)
+	repo := new(internalmock.RepositoryMock)
 
-	newCampaign.Name = ""
-	_, err := service.Create(newCampaign)
+	service := campaign.ServiceImp{Repository: repo}
+	campaign := newTestCampaign()
+	campaign.Name = ""
 
-	assert.False((errors.Is(internalerrors.ErrInternal, err)))
+	_, err := service.Create(campaign)
 
+	assert.False(errors.Is(internalerrors.ErrInternal, err))
 }
+
 func Test_Create_SaveCampaign(t *testing.T) {
-	repo := new(repositoryMock)
-	repo.On("Save", mock.MatchedBy(func(c *Campaign) bool {
+	repo := new(internalmock.RepositoryMock)
+	repo.On("Save", mock.MatchedBy(func(c *campaign.Campaign) bool {
 		return c.Name == "Test Y" && c.Content == "Body Hi" && len(c.Contacts) == 1
 	})).Return(nil)
 
-	service := ServiceImp{Repository: repo}
-	newCampaign := contract.NewCampaign{
-		Name:    "Test Y",
-		Content: "Body Hi",
-		Emails:  []string{"test1@email.com"},
-	}
+	service := campaign.ServiceImp{Repository: repo}
+	campaign := newTestCampaign()
 
-	service.Create(newCampaign)
+	service.Create(campaign)
 
 	repo.AssertExpectations(t)
 }
+
 func Test_Create_ValidateRepositorySave(t *testing.T) {
 	assert := assert.New(t)
-	repo := new(repositoryMock)
+	repo := new(internalmock.RepositoryMock)
 	repo.On("Save", mock.Anything).Return(errors.New("internal server error"))
 
-	service := ServiceImp{Repository: repo}
-	newCampaign := contract.NewCampaign{
-		Name:    "Test Y",
-		Content: "Body Hi",
-		Emails:  []string{"test1@email.com"},
-	}
+	service := campaign.ServiceImp{Repository: repo}
+	campaign := newTestCampaign()
 
-	_, err := service.Create(newCampaign)
+	_, err := service.Create(campaign)
 
 	assert.True(errors.Is(err, internalerrors.ErrInternal))
 }
 
 func Test_GetById_ReturnCampaign(t *testing.T) {
 	assert := assert.New(t)
-	campaign, _ := NewCampaign(newCampaign.Name, newCampaign.Content, newCampaign.Emails)
-	repo := new(repositoryMock)
+	campaignData := newTestCampaign()
+	campaignTest, _ := campaign.NewCampaign(campaignData.Name, campaignData.Content, campaignData.Emails)
+
+	repo := new(internalmock.RepositoryMock)
 	repo.On("GetBy", mock.MatchedBy(func(id string) bool {
-		return id == campaign.ID
-	})).Return(campaign, nil)
-	service.Repository = repo
+		return id == campaignTest.ID
+	})).Return(campaignTest, nil)
 
-	campaignReturned, _ := service.GetBy(campaign.ID)
+	service := campaign.ServiceImp{Repository: repo}
 
-	assert.Equal(campaign.ID, campaignReturned.ID)
-	assert.Equal(campaign.Name, campaignReturned.Name)
-	assert.Equal(campaign.Content, campaignReturned.Content)
-	assert.Equal(campaign.Status, campaignReturned.Status)
+	campaignReturned, _ := service.GetBy(campaignTest.ID)
+
+	assert.Equal(campaignTest.ID, campaignReturned.ID)
+	assert.Equal(campaignTest.Name, campaignReturned.Name)
+	assert.Equal(campaignTest.Content, campaignReturned.Content)
+	assert.Equal(campaignTest.Status, campaignReturned.Status)
 }
+
 func Test_GetById_ReturnErrorWhenSomethingWrongExists(t *testing.T) {
 	assert := assert.New(t)
-	campaign, _ := NewCampaign(newCampaign.Name, newCampaign.Content, newCampaign.Emails)
-	repo := new(repositoryMock)
+	campaignData := newTestCampaign()
+	campaignTest, _ := campaign.NewCampaign(campaignData.Name, campaignData.Content, campaignData.Emails)
+
+	repo := new(internalmock.RepositoryMock)
 	repo.On("GetBy", mock.Anything).Return(nil, errors.New("Something Wrong"))
-	service.Repository = repo
 
-	_, err := service.GetBy(campaign.ID)
+	service := campaign.ServiceImp{Repository: repo}
 
-	assert.Equal(err.Error(), internalerrors.ErrInternal.Error())
+	_, err := service.GetBy(campaignTest.ID)
+
+	assert.Equal(internalerrors.ErrInternal.Error(), err.Error())
 }
