@@ -28,6 +28,18 @@ services:
     volumes:
       - pgadmin_data:/var/lib/pgadmin
 
+  keycloak:
+    image: quay.io/keycloak/keycloak:21.1.1
+    container_name: keycloak
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HOSTNAME: localhost
+    ports:
+      - "8081:8080" 
+    command: start-dev
+    restart: always
+
 volumes:
   postgres_data:
   pgadmin_data:
