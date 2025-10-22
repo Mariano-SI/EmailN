@@ -32,6 +32,10 @@ func (cr *CampaignRepository) GetBy(id string) (*campaign.Campaign, error) {
 
 	tx := cr.Db.Preload("Contacts").First(&campaign, "id = ?", id)
 
+	if tx.Error.Error() == gorm.ErrRecordNotFound.Error(){
+		return nil, nil
+	}
+
 	return &campaign, tx.Error
 }
 

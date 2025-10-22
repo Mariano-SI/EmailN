@@ -48,6 +48,10 @@ func (s *ServiceImp) Get() ([]Campaign, error) {
 func (s *ServiceImp) GetBy(id string) (*contract.CampaignResponse, error) {
 	campaign, err := s.Repository.GetBy(id)
 
+	if campaign == nil && err == nil{
+		return nil, nil
+	}
+
 	if err != nil {
 		return nil, internalerrors.ErrInternal
 	}

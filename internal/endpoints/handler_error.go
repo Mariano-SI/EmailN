@@ -22,12 +22,19 @@ func HandlerError(endpointFunc EndpointFunc) http.HandlerFunc {
 			render.JSON(w, r, map[string]string{"error": err.Error()})
 			return
 		}
-
+		
 		if status == http.StatusNoContent {
 			w.WriteHeader(http.StatusNoContent)
 			return
 		}
+		
+		if status == http.StatusNotFound {
+			w.WriteHeader(http.StatusNotFound)
+			render.JSON(w, r, map[string]string{"error": "resource not found"})
+			return
+		}
 		render.Status(r, status)
+		
 		if obj != nil {
 			render.JSON(w, r, obj)
 		}
