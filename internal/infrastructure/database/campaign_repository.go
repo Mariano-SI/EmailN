@@ -37,10 +37,6 @@ func (cr *CampaignRepository) GetBy(id string) (*campaign.Campaign, error) {
 
 func (cr *CampaignRepository) Delete(campaign *campaign.Campaign) error {
 
-	for _, contact := range campaign.Contacts {
-		cr.Db.Delete(contact)
-	}
-
-	tx := cr.Db.Delete(campaign)
+	tx := cr.Db.Select("Contacts").Delete(campaign)
 	return tx.Error
 }
