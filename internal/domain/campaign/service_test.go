@@ -11,6 +11,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"gorm.io/gorm"
 )
 
 func newTestCampaign() contract.NewCampaign {
@@ -108,4 +109,60 @@ func Test_GetById_ReturnErrorWhenSomethingWrongExists(t *testing.T) {
 	_, err := service.GetBy(campaignTest.ID)
 
 	assert.Equal(internalerrors.ErrInternal.Error(), err.Error())
+}
+
+func Test_Delete_ReturnNotFound_when_campaign_not_exists(t *testing.T) {
+	assert := assert.New(t)
+	invalidCampaignId := "dasdawdwwe"
+	repo := new(internalmock.RepositoryMock)
+	repo.On("GetBy", mock.Anything).Return(nil, gorm.ErrRecordNotFound)
+
+	service := campaign.ServiceImp{Repository: repo}
+
+	err := service.Delete(invalidCampaignId)
+
+	assert.Equal(err.Error(), gorm.ErrRecordNotFound.Error())
+
+}
+func Test_Delete_ReturnStatusInvalid_when_staus_is_not_equals_pending(t *testing.T) {
+	assert := assert.New(t)
+	campaignTest, _ := campaign.NewCampaign("Test campaing", "test content", []string{"email@email.com"})
+	campaignTest.Cancel()
+	repo := new(internalmock.RepositoryMock)
+	repo.On("GetBy", mock.Anything).Return(campaignTest, nil)
+
+	service := campaign.ServiceImp{Repository: repo}
+
+	err := service.Delete(campaignTest.ID)
+
+	assert.Equal(err.Error(), "Campaign status invalid")
+
+}
+func Test_Delete_ReturnInternalError_when_deleted_failed(t *testing.T) {
+	assert := assert.New(t)
+	campaignTest, _ := campaign.NewCampaign("Test campaing", "test content", []string{"email@email.com"})
+	repo := new(internalmock.RepositoryMock)
+	repo.On("GetBy", mock.Anything).Return(campaignTest, nil)
+	repo.On("Delete", mock.Anything).Return(errors.New("error on delete"))
+
+	service := campaign.ServiceImp{Repository: repo}
+
+	err := service.Delete(campaignTest.ID)
+
+	assert.Equal(err.Error(), internalerrors.ErrInternal.Error())
+
+}
+func Test_Delete_SuccessCase(t *testing.T) {
+	assert := assert.New(t)
+	campaignTest, _ := campaign.NewCampaign("Test campaing", "test content", []string{"email@email.com"})
+	repo := new(internalmock.RepositoryMock)
+	repo.On("GetBy", mock.Anything).Return(campaignTest, nil)
+	repo.On("Delete", mock.Anything).Return(nil)
+
+	service := campaign.ServiceImp{Repository: repo}
+
+	err := service.Delete(campaignTest.ID)
+
+	assert.Nil(err)
+
 }
