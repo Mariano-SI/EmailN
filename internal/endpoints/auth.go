@@ -3,6 +3,7 @@ package endpoints
 import (
 	"context"
 	"net/http"
+	"os"
 	"strings"
 
 	oidc "github.com/coreos/go-oidc/v3/oidc"
@@ -21,7 +22,12 @@ func Auth(next http.Handler) http.Handler {
 
 		tokenString = strings.Split(tokenString, " ")[1]
 
-		provider, err := oidc.NewProvider(r.Context(), "http://localhost:8081/realms/provider")
+		keycloakBaseURL := os.Getenv("KEYCLOAK_BASE_URL")
+		keycloakRealm := os.Getenv("KEYCLOAK_REALM")
+		keycloakClientID := os.Getenv("KEYCLOAK_CLIENT_ID")
+		providerURL := keycloakBaseURL + "/realms/" + keycloakRealm
+
+		provider, err := oidc.NewProvider(r.Context(), providerURL)
 
 		if err != nil {
 			render.Status(r, http.StatusInternalServerError)
@@ -29,7 +35,7 @@ func Auth(next http.Handler) http.Handler {
 			return
 		}
 
-		verifier := provider.Verifier(&oidc.Config{ClientID: "emailn"})
+		verifier := provider.Verifier(&oidc.Config{ClientID: keycloakClientID})
 
 		_, err = verifier.Verify(r.Context(), tokenString)
 
