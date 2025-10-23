@@ -5,6 +5,8 @@ go 1.24.0
 toolchain go1.24.9
 
 require (
+	github.com/coreos/go-oidc/v3 v3.16.0
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-chi/chi v1.5.5
 	github.com/go-chi/render v1.0.3
 	github.com/go-playground/validator/v10 v10.28.0
@@ -17,7 +19,6 @@ require (
 
 require (
 	github.com/ajg/form v1.5.1 // indirect
-	github.com/coreos/go-oidc/v3 v3.16.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.10 // indirect
 	github.com/go-jose/go-jose/v4 v4.1.3 // indirect
