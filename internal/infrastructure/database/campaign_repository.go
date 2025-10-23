@@ -21,10 +21,9 @@ func (cr *CampaignRepository) Update(campaign *campaign.Campaign) error {
 }
 
 func (cr *CampaignRepository) Get() ([]campaign.Campaign, error) {
-
-	var campaings []campaign.Campaign
-	tx := cr.Db.Find(&campaings)
-	return campaings, tx.Error
+	var campaigns []campaign.Campaign
+	tx := cr.Db.Preload("Contacts").Find(&campaigns)
+	return campaigns, tx.Error
 }
 
 func (cr *CampaignRepository) GetBy(id string) (*campaign.Campaign, error) {
