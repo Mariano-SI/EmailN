@@ -167,3 +167,74 @@ func Test_Delete_SuccessCase(t *testing.T) {
 	assert.Nil(err)
 
 }
+
+func Test_Start_ReturnNotFound_when_campaign_not_exists(t *testing.T) {
+	assert := assert.New(t)
+	invalidCampaignId := "dasdawdwwe"
+	repo := new(internalmock.RepositoryMock)
+	repo.On("GetBy", mock.Anything).Return(nil, gorm.ErrRecordNotFound)
+
+	service := campaign.ServiceImp{Repository: repo}
+
+	err := service.Start(invalidCampaignId)
+
+	assert.Equal(err.Error(), gorm.ErrRecordNotFound.Error())
+
+}
+
+func Test_Start_send_mail(t *testing.T) {
+	assert := assert.New(t)
+	campaignTest, _ := campaign.NewCampaign("Test campaing", "test content", []string{"email@email.com"}, "test@test.com")
+	repo := new(internalmock.RepositoryMock)
+	repo.On("GetBy", mock.Anything).Return(campaignTest, nil)
+	sentEmail := false
+	sendMail := func(campaign *campaign.Campaign) error {
+		sentEmail = true
+		return nil
+	}
+
+	service := campaign.ServiceImp{Repository: repo, SendEmail: sendMail}
+
+	err := service.Start(campaignTest.ID)
+
+	assert.Nil(err)
+	assert.True(sentEmail)
+
+}
+func Test_Start_returns_internal_error_if_sendmail_fail(t *testing.T) {
+	assert := assert.New(t)
+	campaignTest, _ := campaign.NewCampaign("Test campaing", "test content", []string{"email@email.com"}, "test@test.com")
+	repo := new(internalmock.RepositoryMock)
+	repo.On("GetBy", mock.Anything).Return(campaignTest, nil)
+	sendMail := func(campaign *campaign.Campaign) error {
+
+		return errors.New("error sending email")
+	}
+
+	service := campaign.ServiceImp{Repository: repo, SendEmail: sendMail}
+
+	err := service.Start(campaignTest.ID)
+
+	assert.Equal(err.Error(), internalerrors.ErrInternal.Error())
+
+}
+func Test_Start_returns_nil_when_updated_to_done(t *testing.T) {
+	assert := assert.New(t)
+	campaignTest, _ := campaign.NewCampaign("Test campaing", "test content", []string{"email@email.com"}, "test@test.com")
+	repo := new(internalmock.RepositoryMock)
+	repo.On("GetBy", mock.Anything).Return(campaignTest, nil)
+	repo.On("Update", mock.MatchedBy(func(campaignToUpdate *campaign.Campaign) bool {
+		return campaignTest.ID == campaignToUpdate.ID && campaignToUpdate.Status == campaign.Done
+	})).Return(campaignTest, nil)
+	sendMail := func(campaign *campaign.Campaign) error {
+		return nil
+	}
+
+	service := campaign.ServiceImp{Repository: repo, SendEmail: sendMail}
+
+	err := service.Start(campaignTest.ID)
+
+	assert.Nil(err)
+	assert.Equal(campaignTest.Status, campaign.Done)
+
+}
