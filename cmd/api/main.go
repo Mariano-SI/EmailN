@@ -4,6 +4,7 @@ import (
 	"emailn/internal/domain/campaign"
 	"emailn/internal/endpoints"
 	"emailn/internal/infrastructure/database"
+	"emailn/internal/infrastructure/mail"
 	"fmt"
 	"log"
 	"net/http"
@@ -31,7 +32,7 @@ func main() {
 
 	db := database.NewDb()
 	campaignRepository := database.CampaignRepository{Db: db}
-	campaignService := campaign.ServiceImp{Repository: &campaignRepository}
+	campaignService := campaign.ServiceImp{Repository: &campaignRepository, SendEmail: mail.SendMail}
 	handler := endpoints.Handler{CampaignService: &campaignService}
 
 	r.Route("/campaigns", func(r chi.Router) {
@@ -40,6 +41,7 @@ func main() {
 		r.Get("/{id}", endpoints.HandlerError(handler.CampaignGetById))
 		r.Delete("/{id}", endpoints.HandlerError(handler.CampaignDelete))
 		r.Post("/", endpoints.HandlerError(handler.CampaignPost))
+		r.Post("/{id}/start", endpoints.HandlerError(handler.CampaignStart))
 	})
 
 	r.Get("/ping", func(w http.ResponseWriter, r *http.Request) {
