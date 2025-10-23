@@ -9,7 +9,9 @@ import (
 
 func (h *Handler) CampaignPost(w http.ResponseWriter, r *http.Request) (interface{}, int, error) {
 	var request contract.NewCampaign
+	email := r.Context().Value("email").(string)
 	render.DecodeJSON(r.Body, &request)
+	request.CreatedBy = email
 
 	id, err := h.CampaignService.Create(request)
 
