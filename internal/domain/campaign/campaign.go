@@ -28,6 +28,7 @@ type Campaign struct {
 	Content   string    `validate:"min=5,max=1024" gorm:"size:1024"`
 	Contacts  []Contact `validate:"min=1,dive"`
 	Status    string    `gorm:"size:20"`
+	CreatedBy string    `validate:"email" gorm:"size:100"`
 }
 
 func (c *Campaign) Cancel() {
@@ -37,7 +38,7 @@ func (c *Campaign) Delete() {
 	c.Status = Deleted
 }
 
-func NewCampaign(name string, content string, emails []string) (*Campaign, error) {
+func NewCampaign(name string, content string, emails []string, created_by string) (*Campaign, error) {
 
 	contacts := make([]Contact, len(emails))
 
@@ -52,6 +53,7 @@ func NewCampaign(name string, content string, emails []string) (*Campaign, error
 		CreatedOn: time.Now(),
 		Contacts:  contacts,
 		Status:    Pending,
+		CreatedBy: created_by,
 	}
 
 	err := internalerrors.ValidateStruct(campaign)
