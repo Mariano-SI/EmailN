@@ -193,7 +193,7 @@ func Test_Start_send_mail(t *testing.T) {
 		return nil
 	}
 
-	service := campaign.ServiceImp{Repository: repo, SendEmail: sendMail}
+	service := campaign.ServiceImp{Repository: repo, SendMail: sendMail}
 
 	err := service.Start(campaignTest.ID)
 
@@ -211,7 +211,7 @@ func Test_Start_returns_internal_error_if_sendmail_fail(t *testing.T) {
 		return errors.New("error sending email")
 	}
 
-	service := campaign.ServiceImp{Repository: repo, SendEmail: sendMail}
+	service := campaign.ServiceImp{Repository: repo, SendMail: sendMail}
 
 	err := service.Start(campaignTest.ID)
 
@@ -230,7 +230,7 @@ func Test_Start_returns_nil_when_updated_to_done(t *testing.T) {
 		return nil
 	}
 
-	service := campaign.ServiceImp{Repository: repo, SendEmail: sendMail}
+	service := campaign.ServiceImp{Repository: repo, SendMail: sendMail}
 
 	err := service.Start(campaignTest.ID)
 

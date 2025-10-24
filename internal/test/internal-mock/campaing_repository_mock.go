@@ -36,3 +36,7 @@ func (r *RepositoryMock) Update(campaign *campaign.Campaign) error {
 	args := r.Called(campaign)
 	return args.Error(0)
 }
+
+func (r *RepositoryMock) GetCampaignsToBeSent() ([]campaign.Campaign, error) {
+	return []campaign.Campaign{}, nil
+}

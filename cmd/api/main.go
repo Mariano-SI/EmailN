@@ -32,7 +32,7 @@ func main() {
 
 	db := database.NewDb()
 	campaignRepository := database.CampaignRepository{Db: db}
-	campaignService := campaign.ServiceImp{Repository: &campaignRepository, SendEmail: mail.SendMail}
+	campaignService := campaign.ServiceImp{Repository: &campaignRepository, SendMail: mail.SendMail}
 	handler := endpoints.Handler{CampaignService: &campaignService}
 
 	r.Route("/campaigns", func(r chi.Router) {
