@@ -14,8 +14,8 @@ import (
 	"gorm.io/gorm"
 )
 
-func newTestCampaign() contract.NewCampaign {
-	return contract.NewCampaign{
+func newTestCampaign() contract.NewCampaignRequest {
+	return contract.NewCampaignRequest{
 		Name:      "Test Y",
 		Content:   "Body Hi",
 		Emails:    []string{"test1@email.com"},
@@ -80,7 +80,7 @@ func Test_Create_ValidateRepositorySave(t *testing.T) {
 func Test_GetById_ReturnCampaign(t *testing.T) {
 	assert := assert.New(t)
 	campaignData := newTestCampaign()
-	campaignTest, _ := campaign.NewCampaign(campaignData.Name, campaignData.Content, campaignData.Emails, campaignData.CreatedBy)
+	campaignTest, _ := campaign.NewCampaignRequest(campaignData.Name, campaignData.Content, campaignData.Emails, campaignData.CreatedBy)
 
 	repo := new(internalmock.RepositoryMock)
 	repo.On("GetBy", mock.MatchedBy(func(id string) bool {
@@ -100,7 +100,7 @@ func Test_GetById_ReturnCampaign(t *testing.T) {
 func Test_GetById_ReturnErrorWhenSomethingWrongExists(t *testing.T) {
 	assert := assert.New(t)
 	campaignData := newTestCampaign()
-	campaignTest, _ := campaign.NewCampaign(campaignData.Name, campaignData.Content, campaignData.Emails, campaignData.CreatedBy)
+	campaignTest, _ := campaign.NewCampaignRequest(campaignData.Name, campaignData.Content, campaignData.Emails, campaignData.CreatedBy)
 
 	repo := new(internalmock.RepositoryMock)
 	repo.On("GetBy", mock.Anything).Return(nil, errors.New("Something Wrong"))
@@ -127,7 +127,7 @@ func Test_Delete_ReturnNotFound_when_campaign_not_exists(t *testing.T) {
 }
 func Test_Delete_ReturnStatusInvalid_when_staus_is_not_equals_pending(t *testing.T) {
 	assert := assert.New(t)
-	campaignTest, _ := campaign.NewCampaign("Test campaing", "test content", []string{"email@email.com"}, "test@test.com")
+	campaignTest, _ := campaign.NewCampaignRequest("Test campaing", "test content", []string{"email@email.com"}, "test@test.com")
 	campaignTest.Cancel()
 	repo := new(internalmock.RepositoryMock)
 	repo.On("GetBy", mock.Anything).Return(campaignTest, nil)
@@ -141,7 +141,7 @@ func Test_Delete_ReturnStatusInvalid_when_staus_is_not_equals_pending(t *testing
 }
 func Test_Delete_ReturnInternalError_when_deleted_failed(t *testing.T) {
 	assert := assert.New(t)
-	campaignTest, _ := campaign.NewCampaign("Test campaing", "test content", []string{"email@email.com"}, "test@test.com")
+	campaignTest, _ := campaign.NewCampaignRequest("Test campaing", "test content", []string{"email@email.com"}, "test@test.com")
 	repo := new(internalmock.RepositoryMock)
 	repo.On("GetBy", mock.Anything).Return(campaignTest, nil)
 	repo.On("Delete", mock.Anything).Return(errors.New("error on delete"))
@@ -155,7 +155,7 @@ func Test_Delete_ReturnInternalError_when_deleted_failed(t *testing.T) {
 }
 func Test_Delete_SuccessCase(t *testing.T) {
 	assert := assert.New(t)
-	campaignTest, _ := campaign.NewCampaign("Test campaing", "test content", []string{"email@email.com"}, "test@test.com")
+	campaignTest, _ := campaign.NewCampaignRequest("Test campaing", "test content", []string{"email@email.com"}, "test@test.com")
 	repo := new(internalmock.RepositoryMock)
 	repo.On("GetBy", mock.Anything).Return(campaignTest, nil)
 	repo.On("Delete", mock.Anything).Return(nil)
@@ -184,9 +184,10 @@ func Test_Start_ReturnNotFound_when_campaign_not_exists(t *testing.T) {
 
 func Test_Start_send_mail(t *testing.T) {
 	assert := assert.New(t)
-	campaignTest, _ := campaign.NewCampaign("Test campaing", "test content", []string{"email@email.com"}, "test@test.com")
+	campaignTest, _ := campaign.NewCampaignRequest("Test campaing", "test content", []string{"email@email.com"}, "test@test.com")
 	repo := new(internalmock.RepositoryMock)
 	repo.On("GetBy", mock.Anything).Return(campaignTest, nil)
+	repo.On("Update", mock.Anything).Return(nil)
 	sentEmail := false
 	sendMail := func(campaign *campaign.Campaign) error {
 		sentEmail = true
@@ -203,9 +204,10 @@ func Test_Start_send_mail(t *testing.T) {
 }
 func Test_Start_returns_internal_error_if_sendmail_fail(t *testing.T) {
 	assert := assert.New(t)
-	campaignTest, _ := campaign.NewCampaign("Test campaing", "test content", []string{"email@email.com"}, "test@test.com")
+	campaignTest, _ := campaign.NewCampaignRequest("Test campaing", "test content", []string{"email@email.com"}, "test@test.com")
 	repo := new(internalmock.RepositoryMock)
 	repo.On("GetBy", mock.Anything).Return(campaignTest, nil)
+	repo.On("Update", mock.Anything).Return(nil)
 	sendMail := func(campaign *campaign.Campaign) error {
 
 		return errors.New("error sending email")
@@ -220,7 +222,7 @@ func Test_Start_returns_internal_error_if_sendmail_fail(t *testing.T) {
 }
 func Test_Start_returns_nil_when_updated_to_done(t *testing.T) {
 	assert := assert.New(t)
-	campaignTest, _ := campaign.NewCampaign("Test campaing", "test content", []string{"email@email.com"}, "test@test.com")
+	campaignTest, _ := campaign.NewCampaignRequest("Test campaing", "test content", []string{"email@email.com"}, "test@test.com")
 	repo := new(internalmock.RepositoryMock)
 	repo.On("GetBy", mock.Anything).Return(campaignTest, nil)
 	repo.On("Update", mock.MatchedBy(func(campaignToUpdate *campaign.Campaign) bool {

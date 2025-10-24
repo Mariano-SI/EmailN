@@ -7,7 +7,7 @@ import (
 )
 
 type Service interface {
-	Create(newCampaign contract.NewCampaign) (string, error)
+	Create(newCampaign contract.NewCampaignRequest) (string, error)
 	Get() ([]Campaign, error)
 	GetBy(id string) (*contract.CampaignResponse, error)
 	Delete(id string) error
@@ -16,11 +16,11 @@ type Service interface {
 
 type ServiceImp struct {
 	Repository Repository
-	SendMail  func(campaing *Campaign) error
+	SendMail   func(campaing *Campaign) error
 }
 
-func (s *ServiceImp) Create(newCampaign contract.NewCampaign) (string, error) {
-	campaign, err := NewCampaign(newCampaign.Name, newCampaign.Content, newCampaign.Emails, newCampaign.CreatedBy)
+func (s *ServiceImp) Create(newCampaign contract.NewCampaignRequest) (string, error) {
+	campaign, err := NewCampaignRequest(newCampaign.Name, newCampaign.Content, newCampaign.Emails, newCampaign.CreatedBy)
 	if err != nil {
 		return "", err
 	}
@@ -105,9 +105,7 @@ func (s *ServiceImp) Start(id string) error {
 		return errors.New("Campaign status invalid")
 	}
 
-
 	go s.SendEmailAndUpdateStatus(campaign)
-
 
 	campaign.Started()
 

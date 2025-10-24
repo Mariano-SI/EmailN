@@ -17,7 +17,7 @@ import (
 )
 
 var (
-	body = contract.NewCampaign{
+	body = contract.NewCampaignRequest{
 		Name:    "Test",
 		Content: "Hi everyone",
 		Emails:  []string{"test@test.com"},
@@ -25,7 +25,7 @@ var (
 	createdByExpected = "test@test.com"
 )
 
-func setup(body contract.NewCampaign, createdByExpected string) (*http.Request, *httptest.ResponseRecorder) {
+func setup(body contract.NewCampaignRequest, createdByExpected string) (*http.Request, *httptest.ResponseRecorder) {
 	var buf bytes.Buffer
 	json.NewEncoder(&buf).Encode(body)
 	req, _ := http.NewRequest("POST", "/", &buf)
@@ -39,7 +39,7 @@ func setup(body contract.NewCampaign, createdByExpected string) (*http.Request, 
 func Test_CampaignsPost_should_save_new_campaign(t *testing.T) {
 	assert := assert.New(t)
 	service := new(internalmock.CampaignServiceMock)
-	service.On("Create", mock.MatchedBy(func(request contract.NewCampaign) bool {
+	service.On("Create", mock.MatchedBy(func(request contract.NewCampaignRequest) bool {
 		return request.Name == body.Name && request.Content == body.Content && request.CreatedBy == createdByExpected
 	})).Return("12345", nil)
 	handler := Handler{service}
