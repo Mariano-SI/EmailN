@@ -13,6 +13,7 @@ const (
 	Cancelled string = "Cancelled"
 	Deleted   string = "Deleted"
 	Done      string = "Done"
+	Fail      string = "Fail"
 )
 
 type Contact struct {
@@ -39,6 +40,12 @@ func (c *Campaign) Delete() {
 }
 func (c *Campaign) Done() {
 	c.Status = Done
+}
+func (c *Campaign) Fail() {
+	c.Status = Fail
+}
+func (c *Campaign) Started() {
+	c.Status = Started
 }
 
 func NewCampaign(name string, content string, emails []string, created_by string) (*Campaign, error) {
