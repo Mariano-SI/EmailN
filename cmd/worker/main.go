@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/joho/godotenv"
 )
@@ -21,12 +22,19 @@ func main() {
 	db := database.NewDb()
 	campaignRepository := database.CampaignRepository{Db: db}
 	campaignService := campaign.ServiceImp{Repository: &campaignRepository, SendMail: mail.SendMail}
-	campaigns, err := campaignRepository.GetCampaignsToBeSent()
-	if err != nil {
-		fmt.Println(err.Error())
-	}
 
-	for _, campaign := range campaigns {
-		campaignService.SendEmailAndUpdateStatus(&campaign)
+	for {
+		campaigns, err := campaignRepository.GetCampaignsToBeSent()
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+
+		fmt.Println("amount of campaings", len(campaigns))
+
+		for _, campaign := range campaigns {
+			campaignService.SendEmailAndUpdateStatus(&campaign)
+		}
+
+		time.Sleep(time.Second * 10)
 	}
 }
